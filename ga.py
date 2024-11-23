@@ -2,7 +2,7 @@ import random
 import math
 import time
 
-DATASET_PATH = "D:\src\softcomp-fp\datasets\\berlin52.tsp"
+DATASET_PATH = ".\datasets\\berlin52.tsp"
 
 class Point:
     def __init__(self, x: float, y: float):
