@@ -4,7 +4,7 @@ import time
 import matplotlib.pyplot as plt
 
 class SolveTSPUsingACO:
-    def __init__(self, mode='ACS', colony_size=10, steps=100, nodes=None):
+    def __init__(self, mode='ACS', colony_size=10, steps=100000, nodes=None):
         self.mode = mode  # ACS or other ACO variants
         self.colony_size = colony_size
         self.steps = steps
@@ -46,7 +46,7 @@ class SolveTSPUsingACO:
         best_path = []
         start_time = time.time()
 
-        for step in range(self.steps):
+        while time.time() - start_time < 0.5:
             paths = []
             path_lengths = []
 
