@@ -1,4 +1,5 @@
 import abc
+import time
 from collections import namedtuple
 from typing import Union, Tuple, List, Iterable, Sequence
 from dataclasses import dataclass
@@ -141,7 +142,7 @@ class Solution(object):
         return self.cost < other.cost
 
 def pso_minimize(
-        n: int,
+        interval: float,
         poolsize: int,
         distances: FloatMatrix,
         p1: float = 0.9,
@@ -173,14 +174,13 @@ def pso_minimize(
     global_solution_index = solutions.index(min(solutions))
     global_solution = copy_solution(solutions[global_solution_index])
 
+    # Time
+    start_time = time.time()
     counter = 1
 
-    while n > 0:
-        print('iteration:', counter, 'g-best:', global_solution.cost)
-        counter += 1
-
+    while time.time() - start_time < interval:
         for i, solution in enumerate(solutions):
-            # Define Solution particles movement.
+            # Define velocity of ith particle.
             velocity = define_velocity([p1, p2, p3], rng)
 
             if velocity == 0:
@@ -201,12 +201,15 @@ def pso_minimize(
         global_solution_index = solutions.index(min(solutions))
         copy_solution_to(solutions[global_solution_index], global_solution)
 
+        # mengubah dinamika pengambilan keputusan partikel untuk eksplorasi
         p1 *= 0.95
         p2 *= 1.01
         p3 = 1 - (p1 + p2)
-        n -= 1
+        print('iteration:', counter, 'g-best:', global_solution.cost)
+        counter += 1
 
-    return global_solution
+    end_time = time.time()
+    return end_time - start_time, global_solution
 
 # move independently on it's own.
 def move_solution_independently(solution: Solution, distances: FloatMatrix, max_no_improv: int, rng: Random):
@@ -233,7 +236,7 @@ def define_velocity(probas: List[float], rng: Random = None) -> int:
     assert sum(probas) == 1.0, 'Sum of all probabilities must be equal to 1.'
     indices = list(range(len(probas)))
     chosen_velocities_ids = rng.choices(indices, probas, k=1)
-    return chosen_velocities_ids[0]  # select and return the first velocity id in the pool.
+    return chosen_velocities_ids[0]
 
 # Menghitung biaya total jalur berdasarkan urutan (sequence) dan matriks jarak (distances).
 def evaluate_cost(seq: List[int], distances: FloatMatrix) -> float:
@@ -340,7 +343,7 @@ class PSO(abc.ABC):
 
 @dataclass
 class TSPPSO(PSO):
-    n: int
+    interval: float
     poolsize: int
     p1: float = 0.9
     p2: float = 0.05
@@ -349,28 +352,30 @@ class TSPPSO(PSO):
     rng: Random = None
 
     def minimize(self, problem: Problem) -> Solution:
-        return pso_minimize(
-            self.n, self.poolsize, problem.distances, self.p1, 
+        runtime, distance = pso_minimize(
+            self.interval, self.poolsize, problem.distances, self.p1, 
             self.p2, self.p3, self.max_no_improv, self.rng)
+        
+        return runtime, distance
 
-def berlin52():
-    # from tsppso.datasets import TSPDataset
+def main():
+    # import TSPDataset
     dataset = TSPDataset()
     dataset.read('.\datasets\\berlin52.tsp')
     dataset.unique(eps=1e-4, inplace=True)
-    print('dataset size:', len(dataset.positions))
+    # print('dataset size:', len(dataset.positions))
 
     import random
-    seed = random.randint(0, 999999)
-    rng = random.Random(seed)
-    print('seed used:', seed)
+    rng = random.seed(0)
+    # print('seed used:', seed)
 
     problem = Problem(xy=dataset.positions)
-    optimizer = TSPPSO(100, 100, p1=0.95, p2=0.03, p3=0.02, max_no_improv=3, rng=rng)
-    solution = optimizer.minimize(problem)
+    optimizer = TSPPSO(0.5, 30, p1=0.95, p2=0.03, p3=0.02, max_no_improv=3, rng=rng)
+    runtime, solution = optimizer.minimize(problem)
 
     print()
-    print('seq:\n{}\n\ng-best:\n{}'.format(solution.sequence, solution.cost))
-    
+    # print('seq:\n{}\n\ng-best:\n{}'.format(solution.sequence, solution.cost))
+    print(f'Runtime: {runtime:.2f}s')
+    print("Best Distance: {}".format(solution.cost))
 if __name__ == "__main__":
-    berlin52()
+    main()
