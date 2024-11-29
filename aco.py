@@ -4,8 +4,7 @@ import time
 import matplotlib.pyplot as plt
 
 class SolveTSPUsingACO:
-    def __init__(self, mode='ACS', colony_size=10, steps=100000, nodes=None):
-        self.mode = mode  # ACS or other ACO variants
+    def __init__(self, colony_size=10, steps=100000, nodes=None):
         self.colony_size = colony_size
         self.steps = steps
         self.nodes = nodes if nodes else []
@@ -116,7 +115,7 @@ if __name__ == '__main__':
     berlin52_nodes = load_tsp_file(tsp_file_path)
     random.seed(0)
 
-    aco_solver = SolveTSPUsingACO(mode='ACS', colony_size=10, steps=100, nodes=berlin52_nodes)
+    aco_solver = SolveTSPUsingACO(colony_size=10, steps=100, nodes=berlin52_nodes)
     runtime, distance = aco_solver.run()
     print(f"Runtime: {runtime:.2f}s")
     print(f"Best Distance: {distance:.2f}")
