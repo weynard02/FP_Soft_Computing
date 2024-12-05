@@ -1,5 +1,7 @@
 import abc
 import time
+import matplotlib.pyplot as plt
+import random
 from collections import namedtuple
 from typing import Union, Tuple, List, Iterable, Sequence
 from dataclasses import dataclass
@@ -145,6 +147,7 @@ def pso_minimize(
         interval: float,
         poolsize: int,
         distances: FloatMatrix,
+        positions: List[Tuple[float, float]],
         p1: float = 0.9,
         p2: float = 0.05,
         p3: float = 0.05,
@@ -152,7 +155,7 @@ def pso_minimize(
         rng: Random = None
 ) -> Solution:
 
-    rng = Random() if rng is None else rng
+    rng = Random(0) if rng is None else rng
 
     # Initialize pool of solutions.
     solutions = list()
@@ -208,8 +211,12 @@ def pso_minimize(
         print('iteration:', counter, 'g-best:', global_solution.cost)
         counter += 1
 
+    print('iteration:', counter, 'g-best:', global_solution.cost)
     end_time = time.time()
-    return end_time - start_time, global_solution
+    runtime = end_time - start_time
+    print(f'Runtime: {runtime:.2f}s')
+    plot(positions, global_solution, counter)
+    return global_solution
 
 # move independently on it's own.
 def move_solution_independently(solution: Solution, distances: FloatMatrix, max_no_improv: int, rng: Random):
@@ -352,11 +359,32 @@ class TSPPSO(PSO):
     rng: Random = None
 
     def minimize(self, problem: Problem) -> Solution:
-        runtime, distance = pso_minimize(
-            self.interval, self.poolsize, problem.distances, self.p1, 
+        distance = pso_minimize(
+            self.interval, self.poolsize, problem.distances, problem.positions, self.p1, 
             self.p2, self.p3, self.max_no_improv, self.rng)
         
-        return runtime, distance
+        return distance
+
+def plot(positions, global_solution, iteration):
+    plt.figure(figsize=(10, 6))
+    
+    # Plot semua kota
+    x_coords, y_coords = zip(*positions)
+    plt.scatter(x_coords, y_coords, label='Nodes (Cities)')
+
+    # Plot solusi global terbaik
+    best_sequence = global_solution.sequence
+    best_x = [positions[i][0] for i in best_sequence]
+    best_y = [positions[i][1] for i in best_sequence]
+    plt.plot(best_x + [best_x[0]], best_y + [best_y[0]], marker='o', linewidth=2, label='Global Best Solution')
+
+    # Judul dan legenda
+    plt.title(f'Optimal TSP Route \nIteration {iteration}: Best Cost = {global_solution.cost:.2f}')
+    # plt.legend()
+    plt.xlabel('X Coordinate')
+    plt.ylabel('Y Coordinate')
+    # plt.grid()
+    plt.show()
 
 def main():
     # import TSPDataset
@@ -365,17 +393,15 @@ def main():
     dataset.unique(eps=1e-4, inplace=True)
     # print('dataset size:', len(dataset.positions))
 
-    import random
-    rng = random.seed(0)
+    
     # print('seed used:', seed)
 
     problem = Problem(xy=dataset.positions)
-    optimizer = TSPPSO(0.5, 30, p1=0.95, p2=0.03, p3=0.02, max_no_improv=3, rng=rng)
-    runtime, solution = optimizer.minimize(problem)
+    optimizer = TSPPSO(0.5, 30, p1=0.95, p2=0.03, p3=0.02, max_no_improv=3)
+    solution = optimizer.minimize(problem)
 
     print()
     # print('seq:\n{}\n\ng-best:\n{}'.format(solution.sequence, solution.cost))
-    print(f'Runtime: {runtime:.2f}s')
     print("Best Distance: {}".format(solution.cost))
 if __name__ == "__main__":
     main()
