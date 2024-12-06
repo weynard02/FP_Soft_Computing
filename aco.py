@@ -136,7 +136,7 @@ if __name__ == '__main__':
 
 
     INTERVAL_TIME = 0.5
-    aco_solver = SolveTSPUsingACO(colony_size=10, steps=100, nodes=berlin52_nodes)
+    aco_solver = SolveTSPUsingACO(colony_size=2, steps=10000, nodes=berlin52_nodes)
     runtime, distance, path = aco_solver.run()
     print(f"Runtime: {runtime:.2f}s")
     print(f"Path: {path}")
