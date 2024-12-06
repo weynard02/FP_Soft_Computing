@@ -10,25 +10,31 @@ data = tsplib95.load('./datasets/berlin52.tsp')
 cities = list(data.get_nodes())
 
 
-def annealing(initial_state):
-    
-    """Peforms simulated annealing to find a solution"""
+def annealing(initial_state, time_limit=300,alpha=0.99):  # default time limit of 300 seconds (5 minutes)
+    """Performs simulated annealing to find a solution with a time limit"""
     initial_temp = 5000
-   
-    alpha = 0.99
-    
     current_temp = initial_temp
-
+    distances = []
+    
     # Start by initializing the current state with the initial state
     solution = initial_state
     same_solution = 0
     same_cost_diff = 0
     
+    start_time = time.time()  # Record start time
+    i = 0 
     while same_solution < 1500 and same_cost_diff < 150000:
+        # Check if time limit has been reached
+        current_time = time.time()
+
+        if (current_time - start_time) >= time_limit:
+            print(f"Time limit of {time_limit} seconds reached!")
+            break
+            
         neighbor = get_neighbors(solution)
         
         # Check if neighbor is best so far
-        cost_diff = get_cost(neighbor) - get_cost(solution)
+        cost_diff = get_cost(neighbor+[neighbor[0]]) - get_cost(solution+[solution[0]])
         # if the new solution is better, accept it
         if cost_diff > 0:
             solution = neighbor
@@ -50,16 +56,28 @@ def annealing(initial_state):
                 same_cost_diff+=1
         # decrement the temperature
         current_temp = current_temp*alpha
-        print(1/get_cost(solution), same_solution)
-    print(1/get_cost(solution))
-    
-    return solution, 1/get_cost(solution)
+        kk = get_cost(solution)
+        distances.append(1/kk)
+        i+=1
+        print("iteration:",i,"distance:",1/kk)
 
+    return solution+[solution[0]], 1/get_cost(solution),distances
+
+def plot_distances(distances):
+    """Plots the distances tracked during the annealing process."""
+    plt.figure()
+    plt.plot(distances, label='Distance per Iteration')
+    plt.xlabel('Iteration')
+    plt.ylabel('Distance')
+    plt.title('Distance Changes Over Iterations')
+    plt.legend()
+    plt.show()
 def get_cost(state):
     """Calculates cost/fitness for the solution/route."""
     distance = 0
     
     for i in range(len(state)):
+        # print(state)
         from_city = state[i]
         to_city = None
         if i+1 < len(state):
@@ -85,7 +103,6 @@ def get_neighbors(state):
         
     elif func == 2 :
         swap(neighbor)
-    
     else:
         swap_routes(neighbor)
         
@@ -134,9 +151,10 @@ def swap_routes(state):
 best_route_distance = []
 best_route = []
 convergence_time = []
-for i in range(1):     
+def tsp_SA(time_limit,alpha):
     start = time.time()
-    route, route_distance = annealing(cities)
+    route, route_distance,route_distances = annealing(cities, time_limit,alpha=alpha)  
+    print(route, route_distance,len(route))
     time_elapsed = time.time() - start
     best_route_distance.append(route_distance)
     best_route.append(route)
@@ -147,13 +165,37 @@ for i in range(1):
     ys = [data.node_coords[i][1] for i in route]
 
     plt.clf()
-    # 'bo-' means blue color, round points, solid lines
-    plt.plot(xs,ys,'y--')
+
+    plt.plot(xs,ys,'o-')
     plt.xlabel('X Coordinates')
     plt.ylabel('Y Coordinates')
-    
-import pandas as pd
-pd.DataFrame(best_route).to_csv('berlin52_route_2.csv')
-pd.DataFrame(best_route_distance).to_csv('berlin52_route_distance_2.csv')
-pd.DataFrame(convergence_time).to_csv('berlin52_time_convergence_2.csv')
+    plt.show()   
+    plot_distances(route_distances)
+random.seed(0)
+time_list = [0.5,1,2,200]
+alpha = [0.5,0.75,0.95]
+for i in time_list:
+    for j in alpha:
+        print("-"*50)
+        print("TIME : ",i,"ALPHA : ",j)
+        tsp_SA(i,j)
+        print("-"*50)
+        
+time_list = [0.5,1,2,200]
+alpha = [0.75]
+for i in time_list:
+    for j in alpha:
+        print("-"*50)
+        print("TIME : ",i,"ALPHA : ",j)
+        tsp_SA(i,j)
+        print("-"*50)
+
+time_list = [0.5,1,2,200]     
+alpha = [0.95]
+for i in time_list:
+    for j in alpha:
+        print("-"*50)
+        print("TIME : ",i,"ALPHA : ",j)
+        tsp_SA(i,j)
+        print("-"*50)
 
