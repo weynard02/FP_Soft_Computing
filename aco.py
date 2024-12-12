@@ -84,16 +84,15 @@ class SolveTSPUsingACO:
 
     def _calculate_path_length(self, path):
         return sum(self.distances[path[i]][path[i + 1]] for i in range(len(path) - 1))
-    
-    
-    def plot_solution_history(self):
-        plt.figure(figsize=(10, 6))
-        plt.plot(self.distance_history, marker='o', linestyle='-')
-        plt.title('ACO Solution History')
-        plt.xlabel('Step')
-        plt.ylabel('Shortest Distance')
-        plt.grid(True)
-        plt.show()
+
+    def plot_dist(self):
+      plt.figure(figsize=[8, 6])
+      plt.plot(self.distance_history, 'b', linewidth=3.0)
+      plt.legend(['Solution Fitness'], fontsize=18)
+      plt.xlabel('Iteration', fontsize=16)
+      plt.ylabel('Distance', fontsize=16)
+      plt.title('Solution History', fontsize=16)
+      plt.show()
 
     def plot(self):
         x_coords = [self.nodes[i][0] for i in self.best_path]
@@ -105,8 +104,8 @@ class SolveTSPUsingACO:
         plt.xlabel('X Coordinate')
         plt.ylabel('Y Coordinate')
         plt.show()
-    
-    
+
+
 
 def load_tsp_file(file_path):
 
@@ -135,12 +134,12 @@ if __name__ == '__main__':
     random.seed(0)
 
 
-    INTERVAL_TIME = 0.5
-    aco_solver = SolveTSPUsingACO(colony_size=2, steps=10000, nodes=berlin52_nodes)
+    INTERVAL_TIME = 2
+    aco_solver = SolveTSPUsingACO(colony_size=3, steps=10000, nodes=berlin52_nodes)
     runtime, distance, path = aco_solver.run()
     print(f"Runtime: {runtime:.2f}s")
     print(f"Path: {path}")
     print(f"Best Distance: {distance:.2f}")
 
     aco_solver.plot()
-    aco_solver.plot_solution_history()
+    aco_solver.plot_dist()
