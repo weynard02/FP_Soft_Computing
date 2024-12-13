@@ -179,7 +179,10 @@ def pso_minimize(
 
     # Time
     start_time = time.time()
+    last_append_time = start_time
     counter = 1
+
+    solution_history = []
 
     while time.time() - start_time < interval:
         for i, solution in enumerate(solutions):
@@ -208,14 +211,29 @@ def pso_minimize(
         p1 *= 0.95
         p2 *= 1.01
         p3 = 1 - (p1 + p2)
-        print('iteration:', counter, 'g-best:', global_solution.cost)
+
+        if (p1 + p2 + p3) != 1.0:
+            total = p1 + p2
+            p1 /= total
+            p2 /= total
+            p3 = 1 - (p1 + p2)
+        # print('iteration:', counter, 'g-best:', global_solution.cost)
+        current_time = time.time()
+        between_time = current_time - last_append_time
+        if between_time >= 0.97:
+            print(f"Detik ke: {between_time}")
+            solution_history.append(global_solution.cost)
+            last_append_time = current_time
+
         counter += 1
 
-    print('iteration:', counter, 'g-best:', global_solution.cost)
+    # print('iteration:', counter, 'g-best:', global_solution.cost)
     end_time = time.time()
     runtime = end_time - start_time
+    print(f'Solution history: {solution_history}')
     print(f'Runtime: {runtime:.2f}s')
-    plot(positions, global_solution, counter)
+    # plot(positions, global_solution, counter)
+    plot_dist(solution_history)
     return global_solution
 
 # move independently on it's own.
@@ -386,22 +404,32 @@ def plot(positions, global_solution, iteration):
     # plt.grid()
     plt.show()
 
-def main():
-    # import TSPDataset
-    dataset = TSPDataset()
-    dataset.read('.\datasets\\berlin52.tsp')
-    dataset.unique(eps=1e-4, inplace=True)
-    # print('dataset size:', len(dataset.positions))
+def plot_dist(solution_history: list):
+    plt.figure(figsize=[8, 6])
+    plt.plot(solution_history, 'b', linewidth=3.0)
+    plt.legend(['Solution Fitness'], fontsize=18)
+    plt.xlabel('Iteration', fontsize=16)
+    plt.ylabel('Distance', fontsize=16)
+    plt.title('Solution History', fontsize=16)
+    plt.show()
 
-    
-    # print('seed used:', seed)
+# import TSPDataset
+dataset = TSPDataset()
+dataset.read('./datasets/berlin52.tsp')
+dataset.unique(eps=1e-4, inplace=True)
 
-    problem = Problem(xy=dataset.positions)
-    optimizer = TSPPSO(0.5, 30, p1=0.95, p2=0.03, p3=0.02, max_no_improv=3)
-    solution = optimizer.minimize(problem)
+problem = Problem(xy=dataset.positions)
+optimizer = TSPPSO(10, 50, p1=0.95, p2=0.03, p3=0.02, max_no_improv=3)
+solution = optimizer.minimize(problem)
 
-    print()
-    # print('seq:\n{}\n\ng-best:\n{}'.format(solution.sequence, solution.cost))
-    print("Best Distance: {}".format(solution.cost))
-if __name__ == "__main__":
-    main()
+# print()
+print("Best Distance: {}".format(solution.cost))
+print("-"*50)
+
+# problem = Problem(xy=dataset.positions)
+# optimizer = TSPPSO(90, 200, p1=0.95, p2=0.03, p3=0.02, max_no_improv=10)
+# solution = optimizer.minimize(problem)
+
+# # print()
+# print("Best Distance: {}".format(solution.cost))
+# print("-"*50)
