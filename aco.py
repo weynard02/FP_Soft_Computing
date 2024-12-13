@@ -94,6 +94,7 @@ class SolveTSPUsingACO:
       plt.title('Solution History', fontsize=16)
       plt.show()
 
+
     def plot(self):
         x_coords = [self.nodes[i][0] for i in self.best_path]
         y_coords = [self.nodes[i][1] for i in self.best_path]
