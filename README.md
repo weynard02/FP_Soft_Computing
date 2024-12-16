@@ -57,7 +57,24 @@ if __name__ == '__main__':
 4. Run the program and see the result
 
 ### Simulated Annealing (SA.py)
+```python
+time_list = [0.5,1,2]
+alpha = [0.95,0.96,0.97,0.98,0.99]
+data = tsplib95.load('./Datasets/berlin52.tsp')
+cities = list(data.get_nodes())
+list_dist = []
+for i in time_list:
+    for j in alpha:
+        print("-"*50)
+        print("TIME : ",i,"ALPHA : ",j)
+        list_dist.append(tsp_SA(i,j))
+        print("-"*50)
 
+```
+1. Before run the program, make sure the dataset `berlin52.tsp` available with the same path as `tsp_file_path` (you can change the path wherever you want)
+2. Set the interval time for the program to run (for this example `INTERVAL_TIME = 0.5`)
+3. Set the parameters of cooling rate(alpha)
+4. Run `python SA.py` and see the result
 ### Particle Swarm Optimization (pso.py)
 #### The main function as follows:
 ```py
