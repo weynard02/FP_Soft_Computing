@@ -8,6 +8,10 @@ from dataclasses import dataclass
 from random import Random
 from functools import total_ordering
 
+INTERVAL_TIME = 1
+NUM_OF_PARTICLE = 50
+MAX_NO_IMPROVE = 3
+
 ########## Data Types ##########
 FloatMatrix = Tuple[Tuple[float, ...], ...]
 
@@ -162,7 +166,7 @@ def pso_minimize(
     base_indices = list(range(len(distances)))
     for i in range(poolsize):
         solution_indices = base_indices.copy()
-        
+
         # Membuat populasi awal partikel (solusi) dengan urutan kota yang diacak
         rng.shuffle(solution_indices)
 
@@ -179,7 +183,6 @@ def pso_minimize(
 
     # Time
     start_time = time.time()
-    last_append_time = start_time
     counter = 1
 
     solution_history = []
@@ -190,7 +193,7 @@ def pso_minimize(
             velocity = define_velocity([p1, p2, p3], rng)
 
             if velocity == 0:
-				# move independently on it's own.
+				        # move independently on it's own.
                 move_solution_independently(solution, distances, max_no_improv, rng)
             elif velocity == 1:
                 # move toward personal best position.
@@ -217,24 +220,17 @@ def pso_minimize(
             p1 /= total
             p2 /= total
             p3 = 1 - (p1 + p2)
-        # print('iteration:', counter, 'g-best:', global_solution.cost)
-        current_time = time.time()
-        between_time = current_time - last_append_time
-        if between_time >= 0.97:
-            print(f"Detik ke: {between_time}")
-            solution_history.append(global_solution.cost)
-            last_append_time = current_time
-
+        #print('iteration:', counter, 'g-best:', global_solution.cost)
+        solution_history.append(global_solution.cost)
         counter += 1
 
-    # print('iteration:', counter, 'g-best:', global_solution.cost)
     end_time = time.time()
     runtime = end_time - start_time
-    print(f'Solution history: {solution_history}')
     print(f'Runtime: {runtime:.2f}s')
-    # plot(positions, global_solution, counter)
+    print('iteration:', counter)
+    plot(positions, global_solution, counter)
     plot_dist(solution_history)
-    return global_solution
+    return global_solution, solution_history
 
 # move independently on it's own.
 def move_solution_independently(solution: Solution, distances: FloatMatrix, max_no_improv: int, rng: Random):
@@ -377,15 +373,15 @@ class TSPPSO(PSO):
     rng: Random = None
 
     def minimize(self, problem: Problem) -> Solution:
-        distance = pso_minimize(
-            self.interval, self.poolsize, problem.distances, problem.positions, self.p1, 
+        distance, solution_history = pso_minimize(
+            self.interval, self.poolsize, problem.distances, problem.positions, self.p1,
             self.p2, self.p3, self.max_no_improv, self.rng)
-        
-        return distance
+
+        return distance, solution_history
 
 def plot(positions, global_solution, iteration):
     plt.figure(figsize=(10, 6))
-    
+
     # Plot semua kota
     x_coords, y_coords = zip(*positions)
     plt.scatter(x_coords, y_coords, label='Nodes (Cities)')
@@ -419,17 +415,7 @@ dataset.read('./datasets/berlin52.tsp')
 dataset.unique(eps=1e-4, inplace=True)
 
 problem = Problem(xy=dataset.positions)
-optimizer = TSPPSO(10, 50, p1=0.95, p2=0.03, p3=0.02, max_no_improv=3)
-solution = optimizer.minimize(problem)
-
-# print()
+optimizer = TSPPSO(interval=INTERVAL_TIME, poolsize=NUM_OF_PARTICLE, p1=0.95, p2=0.03, p3=0.02, max_no_improv=MAX_NO_IMPROVE)
+solution, solution_history_1 = optimizer.minimize(problem)
 print("Best Distance: {}".format(solution.cost))
 print("-"*50)
-
-# problem = Problem(xy=dataset.positions)
-# optimizer = TSPPSO(90, 200, p1=0.95, p2=0.03, p3=0.02, max_no_improv=10)
-# solution = optimizer.minimize(problem)
-
-# # print()
-# print("Best Distance: {}".format(solution.cost))
-# print("-"*50)
