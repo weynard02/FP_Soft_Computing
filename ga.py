@@ -16,7 +16,6 @@ class Individu:
         self.fitness = fitness
 
 
-DATASET_PATH = "./datasets/berlin52.tsp"
 data: list[Point] = []
 data_distances: list[list[int]]
 
@@ -293,10 +292,9 @@ def load_dataset():
         data.append(Point(float(x), float(y)))
         line = file.readline()
 
-    data_distances = [[-1 for i in range(len(data))] for i in range(len(data))]
-
 
 if __name__ == '__main__':
+    DATASET_PATH = "./datasets/berlin52.tsp"
     random.seed(0)
     load_dataset()
     
