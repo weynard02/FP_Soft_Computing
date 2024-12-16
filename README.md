@@ -72,7 +72,7 @@ for i in time_list:
 
 ```
 1. Before run the program, make sure the dataset `berlin52.tsp` available with the same path as `tsp_file_path` (you can change the path wherever you want)
-2. Set the interval time for the program to run (for this example `INTERVAL_TIME = 0.5`)
+2. Set the interval time for the program to run 
 3. Set the parameters of cooling rate(alpha)
 4. Run `python SA.py` and see the result
 ### Particle Swarm Optimization (pso.py)
