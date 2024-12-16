@@ -1,8 +1,29 @@
 # FP_Soft_Computing
 
 ## How to run
+At first, you must install dependencies specified in `requirements.txt` file by run command:
+```
+pip install -r requirements.txt
+```
 
 ### Genetic Algorithm (ga.py)
+#### The main function as follows:
+```py
+if __name__ == '__main__':
+    random.seed(0)
+    load_dataset()
+    
+    # set parameter by change the tsp_ga argument
+    # arg1, arg2, arg3 -> time, mutation rate, crossover rate
+    solution, solution_history = tsp_ga(1, 0.4, 0.7)
+    
+    plot_route(solution)
+    plot_dist(solution_history)
+```
+1. Before run the program, make sure the dataset `berlin52.tsp` available with the same path as `tsp_file_path` (you can change the path wherever you want)
+2. Set the interval time for the program to run (for this example `INTERVAL_TIME = 2`)
+3. Set the parameters on colony size, steps (if needed), and nodes in `SolveTSPUsingACO` function
+4. Run the program and see the result
 
 ### Ant Colony Optimization (aco.py)
 

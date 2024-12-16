@@ -99,9 +99,9 @@ def tsp_ga(max_time, mutation_rate=0.4, crossover_rate=0.7):
 
         # Track the best solution
         if generation > 0:
-          best_solutions.append(best_solutions[generation-1])
+            best_solutions.append(best_solutions[generation-1])
         else:
-          best_solutions.append(populations[0])
+            best_solutions.append(populations[0])
         for i in range(len(populations)):
             if populations[i].fitness < best_solutions[generation].fitness:
                 best_solutions[generation] = populations[i]
@@ -299,13 +299,10 @@ def load_dataset():
 if __name__ == '__main__':
     random.seed(0)
     load_dataset()
-    print("-"*60)
-    print("0.4, 0.7")
+    
+    # set parameter by change the tsp_ga argument
+    # arg1, arg2, arg3 -> time, mutation rate, crossover rate
     solution, solution_history = tsp_ga(1, 0.4, 0.7)
-    print("-"*60)
+    
     plot_route(solution)
     plot_dist(solution_history)
-    f = open("./result.txt", "w")
-    for sh in solution_history:
-      f.write(f"{sh.fitness}\n")
-    f.close()
